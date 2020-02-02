@@ -2,91 +2,40 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GPSCoordinates : MonoBehaviour
+public class FindObj : MonoBehaviour
 {
-    public GameObject exCube;
+    public Text name;
+    public Text Type;
     public Text gps;
-    public Text Info;
-    public GameObject ufo;
-    public Button setObjectHere;
-
+    public Text dist;
+    public Text debugText;
     private GameObject instance;
+    public GameObject ufo;   
     private int distance;
+    float LatOfObject = 42.885216f;
+    float LongOfObject = 74.568994f;
     private float LatLocal = 0.0f;
-    private float LongLocal = 0.0f;
-    private bool exist = false;
-
-    float LatOfObject = 0.0f;
-    float LongOfObject = 0.0f;
+    private float LongLocal = 0.0f;  
+    private bool exist = true;
     bool canCheckGPS = true;
-    string postUrl = "http://69.55.60.116:3000/data";
-    Button btn;
-
     void Start()
     {
-        btn = setObjectHere.GetComponent<Button>();
-        btn.onClick.AddListener(setCoordinates);
+        LatOfObject = ObjInfo.Lat;
+        LongOfObject = ObjInfo.Longt;
+        name.text = ObjInfo.Name;
+        Type.text = ObjInfo.Obj;
+        debugText.text = "LatOfObj = " + LatOfObject + "\n LongOfObj = " + LongOfObject;
     }
-
     public void goToMenu()
     {
         SceneManager.LoadScene("MainScene");
 
     }
-    void setCoordinates() {
-        LatOfObject = LatLocal;
-        LongOfObject = LongLocal;
-        Destroy(exCube);
-        var enemy = new Obj()
-        {
-            name = "TEST",
-            lat = LatOfObject,
-            longt = LongOfObject,
-            objName = "Cube"
-        };
-        btn.gameObject.SetActive(false);
-        StartCoroutine(Post(postUrl, enemy));
-        exist = true;
-    }
-
-    public IEnumerator Post(string url, Obj enemy)
-    {
-        var jsonData = JsonUtility.ToJson(enemy);
-        Debug.Log(jsonData);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(url, jsonData))
-        {
-            www.SetRequestHeader("content-type", "application/json");
-            www.uploadHandler.contentType = "application/json";
-            www.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonData));
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                if (www.isDone)
-                {
-                    var result = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
-                    Debug.Log(result);
-                    Info.text = result;
 
 
-                }
-                else
-                {
-                    //handle the problem
-                    Debug.Log("Error! data couldn't get.");
-                }
-            }
-        }
-    }
     private void FixedUpdate()
     {
         if (canCheckGPS)
@@ -97,9 +46,9 @@ public class GPSCoordinates : MonoBehaviour
         if (distance < 20 && exist)
         {
             exist = false;
-            Vector3 temp = new Vector3(0, 0, 3);
+            Vector3 temp = new Vector3(0, 0, distance);
             instance = Instantiate(ufo, temp, Quaternion.identity);
-            instance.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3;
+            instance.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
 
         }
         else if (distance > 20 && !exist)
@@ -107,6 +56,7 @@ public class GPSCoordinates : MonoBehaviour
             exist = true;
             Destroy(instance);
         }
+
 
     }
     IEnumerator CheckGPSLocation()
@@ -140,6 +90,7 @@ public class GPSCoordinates : MonoBehaviour
             distance = Convert.ToInt32(Calculatedistance(Input.location.lastData.latitude, Input.location.lastData.longitude, LatOfObject, LongOfObject) * 1000);
             LatLocal = Input.location.lastData.latitude;
             LongLocal = Input.location.lastData.longitude;
+            dist.text = distance.ToString() + "m";
         }
        
 
