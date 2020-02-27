@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneMang : MonoBehaviour
 {
+    public Text userName;
 
-    // Start is called before the first frame update
-    
+    private void Start()
+    {
+        UserInfo data = SaveUserData.LoadUserInfo();
+        userName.text = data.name;
+    }
     public void Choose3dObject()
     {
         SceneManager.LoadScene("Choose");
@@ -17,5 +22,15 @@ public class SceneMang : MonoBehaviour
     {
         SceneManager.LoadScene("Set3d");
 
+    }
+    public void Groups()
+    {
+        SceneManager.LoadScene("Groups");
+    }
+
+    public void LogOut()
+    {
+        SaveUserData.Delete();
+        SceneManager.LoadScene("Login");
     }
 }
