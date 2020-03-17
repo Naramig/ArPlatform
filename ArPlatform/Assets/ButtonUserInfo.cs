@@ -9,13 +9,13 @@ public class ButtonUserInfo : MonoBehaviour
     public int id;
     public string login;
     public int group_id;
+  public  bool newUser = true;
     string attachedUserToGroupUrl = ServerInfo.ServerPath + "/attachedUserToGroup";
     CreatingGroup group;
 
     // Start is called before the first frame update
     void Start()
     {
-        this.GetComponentInChildren<Text>().text = login.ToString();
     }
 
     // Update is called once per frame
@@ -58,8 +58,10 @@ public class ButtonUserInfo : MonoBehaviour
                     Debug.Log(result);
                     if (result != "error")
                     {
+                        Button temp = this.GetComponentInChildren<Button>();
+                        temp.GetComponentInChildren<Text>().text = "Remove";
 
-                        
+
                     }
                     else
                     {
@@ -77,7 +79,12 @@ public class ButtonUserInfo : MonoBehaviour
     }
     void Update()
     {
-        
+        if (newUser) {
+            newUser = false;
+            this.GetComponentInChildren<Text>().text = login.ToString();
+            Button temp = this.GetComponentInChildren<Button>();
+            temp.GetComponentInChildren<Text>().text = "Add";
+        }
     }
 
     [System.Serializable]
