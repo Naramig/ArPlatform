@@ -14,6 +14,10 @@ public class GroupData : MonoBehaviour
     {
         nameOfTheGroup.text = name;
     }
+    private void FixedUpdate()
+    {
+        nameOfTheGroup.text = name;
+    }
     public void ChooseGroup()
     {
         SaveGroupInfo.GroupId = id;
