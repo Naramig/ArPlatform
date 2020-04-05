@@ -3,21 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CreatingGroup : MonoBehaviour
 {
+    string userLogin = "";
+    public GameObject listOfUsers;
     // Start is called before the first frame update
     public InputField nameInputFieald;
     public InputField passwordInputField;
     public InputField descriptionInputField;
+    public InputField userLoginInputField;
+
     public int group_id = 0;
     bool availability = false;
-
-    public GameObject userButton;
-    public GameObject canvas;
+    int nextUserPage = 0;
     RootObject myObject;
-    float y = 0;
+    float y = -200;
     float x = 200;
 
     string createGroupUrl = ServerInfo.ServerPath + "/createGroup";
@@ -128,9 +131,9 @@ public class CreatingGroup : MonoBehaviour
                     Debug.Log(result);
                     if (result != "error")
                     {
+                      //  userLoginInputField.setVisible = true;
 
-                        WWW ww = new WWW(getAllUsers + "0");
-                        StartCoroutine(WaitForRequest(ww));                    
+
                     }
                     else
                     {
@@ -146,6 +149,19 @@ public class CreatingGroup : MonoBehaviour
             }
         }
     }
+
+    public void Search()
+    {
+        userLogin = userLoginInputField.text;
+        WWW ww = new WWW(getAllUsers + userLogin);
+        StartCoroutine(WaitForRequest(ww)); 
+    }
+
+    public void goToGroups()
+    {
+        SceneManager.LoadScene("Groups");
+    }
+
     IEnumerator WaitForRequest(WWW www)
     {
         yield return www;
@@ -156,17 +172,16 @@ public class CreatingGroup : MonoBehaviour
             Debug.Log("WWW Result!: " + www.text);// contains all the data sent from the server
             string json = www.text;
             myObject = JsonUtility.FromJson<RootObject>("{\"users\":" + www.text + "}");
-            Debug.Log(myObject.users[1].login);
-            for (int i = 0; i < myObject.users.Length; i++)
-            {
-                GameObject temp = Instantiate(userButton);
-                temp.GetComponent<ButtonUserInfo>().login = myObject.users[i].login;
-                temp.GetComponent<ButtonUserInfo>().id = myObject.users[i].id;
-                temp.GetComponent<ButtonUserInfo>().group_id = group_id;
-
-                temp.transform.SetParent(canvas.transform);
-                temp.transform.position = new Vector3(x, y, 0);
-                y -= 100;
+            if (myObject.users.Length == 0) {
+                Debug.Log("Not found");
+            }
+            else {
+                Debug.Log(myObject.users[0].name);
+                listOfUsers.SetActive(true);
+                listOfUsers.GetComponent<ButtonUserInfo>().login = userLogin;
+                listOfUsers.GetComponent<ButtonUserInfo>().id = myObject.users[0].id;
+                listOfUsers.GetComponent<ButtonUserInfo>().group_id = group_id;
+                listOfUsers.GetComponent<ButtonUserInfo>().newUser = true;
             }
         }
         else
@@ -182,7 +197,7 @@ public class CreatingGroup : MonoBehaviour
     public class Data
     {
         public int id;
-        public string login;
+        public string name;
     }
 
 

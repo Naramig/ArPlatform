@@ -20,7 +20,7 @@ public class SceneMang : MonoBehaviour
     }
     public void Set3dObject()
     {
-        SceneManager.LoadScene("Set3d");
+        SceneManager.LoadScene("Choose3D");
 
     }
     public void Groups()

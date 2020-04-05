@@ -8,8 +8,8 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Set3d.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 0
-    path: Assets/Scenes/Choose.unity
+  - enabled: 1
+    path: Assets/Scenes/Choose3D.unity
     guid: 2d399c6d01bb9e347bc8960ee78fdaae
   - enabled: 0
     path: Assets/Scenes/FindObj.unity
