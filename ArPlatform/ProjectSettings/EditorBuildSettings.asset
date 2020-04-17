@@ -5,21 +5,21 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
+  - enabled: 1
+    path: Assets/Scenes/MainScene.unity
+    guid: 9ec9d2905b603b14186dcf8dab565146
+  - enabled: 1
+    path: Assets/Scenes/FindObj.unity
+    guid: 82b0dccc3a77fa747855a60e5c55bf20
+  - enabled: 1
     path: Assets/Scenes/Set3d.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
     path: Assets/Scenes/Choose3D.unity
     guid: 2d399c6d01bb9e347bc8960ee78fdaae
-  - enabled: 0
-    path: Assets/Scenes/FindObj.unity
-    guid: 82b0dccc3a77fa747855a60e5c55bf20
   - enabled: 1
     path: Assets/Scenes/Login.unity
     guid: d63da03837324ea409427eab08b1f0f4
-  - enabled: 1
-    path: Assets/Scenes/MainScene.unity
-    guid: 9ec9d2905b603b14186dcf8dab565146
   - enabled: 1
     path: Assets/Scenes/Registration.unity
     guid: e97ecbdcca2c6634daa31e0f766e5274
@@ -29,4 +29,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/CreateNewGroup.unity
     guid: 2de4d75613d90ef47b07f61e3a1fb104
+  - enabled: 1
+    path: Assets/Scenes/FindObjectList.unity
+    guid: c3a679e51f06edc46a659f7d51481b83
+  - enabled: 1
+    path: Assets/Scenes/InfoAboutObject.unity
+    guid: 2a0a4fb876915b243a7c145ff6bf0ac8
+  - enabled: 1
+    path: Assets/Scenes/FindNewGroups.unity
+    guid: 7f3f3d2589ab1204e82208d4d4d0adbc
   m_configObjects: {}

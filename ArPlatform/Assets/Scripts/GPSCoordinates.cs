@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Dummiesman;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -8,6 +11,11 @@ using UnityEngine.UI;
 
 public class GPSCoordinates : MonoBehaviour
 {
+    public GameObject cancel;
+    public GameObject InfoToDB;
+    public GameObject AddToBD;
+    public GameObject loadSign;
+    public GameObject preview;
     public GameObject exCube;
     public Text gps;
     public Text Info;
@@ -15,23 +23,47 @@ public class GPSCoordinates : MonoBehaviour
     public Button setObjectHere;
 
     private GameObject instance;
+    GameObject loadedObj;
     private int distance;
     private float LatLocal = 0.0f;
     private float LongLocal = 0.0f;
     private bool exist = false;
 
-    float LatOfObject = 0.0f;
-    float LongOfObject = 0.0f;
+    public float LatOfObject = 0.0f;
+    public float LongOfObject = 0.0f;
     bool canCheckGPS = true;
-    string postUrl = "http://69.55.60.116:3000/data";
     Button btn;
-
+    bool inPreview = false;
+    string getObject = ServerInfo.ServerPath + "/getObject/";
     void Start()
     {
+        // StartCoroutine(LoadFromServer());
+        StartCoroutine(StartDownload());
+        Debug.Log(0);
+        Info.text = "Group's name - " + SaveInfoToPut3D.NameOfGroup + " \n Object's name - " + SaveInfoToPut3D.NameOfObject;
+
+
+        Debug.Log(SaveInfoToPut3D.NameOfGroup + " \\ " + SaveInfoToPut3D.NameOfObject);
         btn = setObjectHere.GetComponent<Button>();
         btn.onClick.AddListener(setCoordinates);
     }
+    
+    public void AddToDatabase()
+    {
+        InfoToDB.SetActive(true);
+        AddToBD.SetActive(false);
+        cancel.SetActive(false);
 
+    }
+    public void Cancel()
+    {
+        Vector3 tmp = new Vector3(0.01f, 0.01f, 0.01f);
+        loadedObj.transform.parent = preview.transform;
+        loadedObj.transform.localScale = tmp;
+        inPreview = true;
+        loadedObj.transform.localPosition = new Vector3(0, 0, 0);
+        btn.gameObject.SetActive(true);
+    }
     public void goToMenu()
     {
         SceneManager.LoadScene("MainScene");
@@ -40,55 +72,37 @@ public class GPSCoordinates : MonoBehaviour
     void setCoordinates() {
         LatOfObject = LatLocal;
         LongOfObject = LongLocal;
-        Destroy(exCube);
-        var enemy = new Obj()
-        {
-            name = "TEST",
-            lat = LatOfObject,
-            longt = LongOfObject,
-            objName = "Cube"
-        };
+        //Destroy(exCube);
         btn.gameObject.SetActive(false);
-        StartCoroutine(Post(postUrl, enemy));
         exist = true;
     }
-
-    public IEnumerator Post(string url, Obj enemy)
+    IEnumerator StartDownload()
     {
-        var jsonData = JsonUtility.ToJson(enemy);
-        Debug.Log(jsonData);
-
-        using (UnityWebRequest www = UnityWebRequest.Post(url, jsonData))
+        using (var www = new WWW(getObject + SaveInfoToPut3D.NameOfObject))
         {
-            www.SetRequestHeader("content-type", "application/json");
-            www.uploadHandler.contentType = "application/json";
-            www.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonData));
-            yield return www.SendWebRequest();
-
-            if (www.isNetworkError)
-            {
-                Debug.Log(www.error);
-            }
-            else
-            {
-                if (www.isDone)
-                {
-                    var result = System.Text.Encoding.UTF8.GetString(www.downloadHandler.data);
-                    Debug.Log(result);
-                    Info.text = result;
-
-
-                }
-                else
-                {
-                    //handle the problem
-                    Debug.Log("Error! data couldn't get.");
-                }
-            }
+            yield return www;
+            AddToBD.SetActive(true);
+            setObjectHere.gameObject.SetActive(true);
+            var textStream = new MemoryStream(Encoding.UTF8.GetBytes(www.text));
+            loadedObj = new OBJLoader().Load(textStream);
+             Vector3 tmp = new Vector3(0.01f, 0.01f, 0.01f);
+            loadedObj.transform.parent = preview.transform;
+            loadedObj.transform.localScale = tmp;
+            ChangePreview();
+            
         }
     }
+    public void ChangePreview()
+    {
+        loadedObj.transform.localPosition = new Vector3(0, 0, 0);
+        loadSign.SetActive(false);
+        Debug.Log("Preview");
+        inPreview = true;
+    }
+    
     private void FixedUpdate()
     {
+        exCube.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 1.5f;
         if (canCheckGPS)
         {
             StartCoroutine(CheckGPSLocation());
@@ -97,15 +111,29 @@ public class GPSCoordinates : MonoBehaviour
         if (distance < 20 && exist)
         {
             exist = false;
-            Vector3 temp = new Vector3(0, 0, 3);
+            /*Vector3 temp = new Vector3(0, 0, 3);
             instance = Instantiate(ufo, temp, Quaternion.identity);
-            instance.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 3;
+            instance.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 1;*/
+            inPreview = false;
+            loadedObj.transform.parent = exCube.transform;
+            loadedObj.transform.parent = null;
 
+
+            exCube.SetActive(false);
+
+            loadedObj.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 0.5f;
+            loadedObj.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            loadedObj.transform.rotation = transform.rotation;
         }
         else if (distance > 20 && !exist)
         {
             exist = true;
             Destroy(instance);
+        }
+
+        //Preview of 3D object
+        if (inPreview) {
+            loadedObj.transform.Rotate(0, -30 * Time.deltaTime, 0);
         }
 
     }

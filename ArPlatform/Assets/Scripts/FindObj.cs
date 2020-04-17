@@ -1,12 +1,21 @@
-﻿using System;
+﻿using Dummiesman;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class FindObj : MonoBehaviour
 {
+
+    public GameObject rightPanel;
+    public GameObject loadingUi;
+    public GameObject finishDownload;
+
+
     public Text name;
     public Text Type;
     public Text gps;
@@ -17,17 +26,34 @@ public class FindObj : MonoBehaviour
     private int distance;
     float LatOfObject = 42.885216f;
     float LongOfObject = 74.568994f;
-    private float LatLocal = 0.0f;
-    private float LongLocal = 0.0f;  
+    public float LatLocal = 0.0f;
+    public float LongLocal = 0.0f;  
     private bool exist = true;
     bool canCheckGPS = true;
+    string getObject = ServerInfo.ServerPath + "/getObject/";
+    GameObject loadedObj;
+    bool isLoaded = false;
     void Start()
     {
-        LatOfObject = ObjInfo.Lat;
-        LongOfObject = ObjInfo.Longt;
-        name.text = ObjInfo.Name;
-        Type.text = ObjInfo.Obj;
+        StartCoroutine(StartDownload());
+        LatOfObject = SaveObjectInfoToFind.Lat;
+        LongOfObject = SaveObjectInfoToFind.Longt;
+        name.text = SaveObjectInfoToFind.Name;
+        Type.text = SaveObjectInfoToFind.Type;
         debugText.text = "LatOfObj = " + LatOfObject + "\n LongOfObj = " + LongOfObject;
+    }
+    IEnumerator StartDownload()
+    {
+        using (var www = new WWW(getObject + SaveObjectInfoToFind.Type))
+        {
+            yield return www;
+            loadingUi.SetActive(false);
+            finishDownload.SetActive(true);
+            var textStream = new MemoryStream(Encoding.UTF8.GetBytes(www.text));
+            loadedObj = new OBJLoader().Load(textStream);
+            loadedObj.SetActive(false); ;
+            isLoaded = true;
+        }
     }
     public void goToMenu()
     {
@@ -43,18 +69,21 @@ public class FindObj : MonoBehaviour
             StartCoroutine(CheckGPSLocation());
             canCheckGPS = false;
         }
-        if (distance < 20 && exist)
+        if (distance < 20 && exist && isLoaded)
         {
+            rightPanel.SetActive(true);
             exist = false;
-            Vector3 temp = new Vector3(0, 0, distance);
-            instance = Instantiate(ufo, temp, Quaternion.identity);
-            instance.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
+            loadedObj.SetActive(true); ;
+            loadedObj.transform.rotation = Quaternion.identity;
+            loadedObj.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distance;
+            loadedObj.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
 
         }
-        else if (distance > 20 && !exist)
+        else if (distance > 20 && !exist && isLoaded)
         {
+            rightPanel.SetActive(false);
             exist = true;
-            Destroy(instance);
+            loadedObj.SetActive(false); 
         }
 
 
@@ -86,10 +115,11 @@ public class FindObj : MonoBehaviour
         }
         else
         {
-            gps.text = "lat = " + Input.location.lastData.latitude + " long = " + Input.location.lastData.longitude;
-            distance = Convert.ToInt32(Calculatedistance(Input.location.lastData.latitude, Input.location.lastData.longitude, LatOfObject, LongOfObject) * 1000);
-            LatLocal = Input.location.lastData.latitude;
-            LongLocal = Input.location.lastData.longitude;
+             LatLocal = Input.location.lastData.latitude;
+             LongLocal = Input.location.lastData.longitude;
+            gps.text = "lat = " + LatLocal + " long = " + LongLocal;
+            distance = Convert.ToInt32(Calculatedistance(LatLocal, LongLocal, LatOfObject, LongOfObject) * 1000);
+          
             dist.text = distance.ToString() + "m";
         }
        
