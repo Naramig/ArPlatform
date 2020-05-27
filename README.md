@@ -10,6 +10,6 @@ Location-Based Augmented Reality Platform allows anyone with an Android smartpho
 * ArPlatfrom  will also help to connect with people, make new friends, and even create a new community
 
 # Demo
-https://www.youtube.com/watch?v=UlMRTozjM_w
-https://www.youtube.com/watch?v=lM9FCf6uTFA&t=1s
+* https://www.youtube.com/watch?v=UlMRTozjM_w
+* https://www.youtube.com/watch?v=lM9FCf6uTFA&t=1s
 
